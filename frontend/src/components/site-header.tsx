@@ -1,5 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Car, Globe2, ShieldCheck, Store } from "lucide-react";
+import { toast } from "sonner";
+
+import { useAuth } from "@/components/auth/auth-provider";
+import { Button } from "@/components/ui/button";
 import { COUNTRIES } from "@/lib/mock-data";
 
 type Props = {
@@ -8,6 +12,17 @@ type Props = {
 };
 
 export function SiteHeader({ selectedCountry, onCountryChange }: Props) {
+  const { user, isLoading, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Déconnexion réussie.");
+    } catch {
+      toast.error("Erreur lors de la déconnexion.");
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-6 py-4">
@@ -32,6 +47,27 @@ export function SiteHeader({ selectedCountry, onCountryChange }: Props) {
                 </option>
               ))}
             </select>
+
+            {!isLoading &&
+              (user ? (
+                <div className="flex items-center gap-2">
+                  <span className="hidden text-sm text-muted-foreground md:inline">
+                    {user.first_name || user.username}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={() => void handleLogout()}>
+                    Déconnexion
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/login">Connexion</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link to="/signup">Créer un compte</Link>
+                  </Button>
+                </div>
+              ))}
           </div>
         </div>
 
